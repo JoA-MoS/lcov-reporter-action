@@ -22798,11 +22798,17 @@ function createHref(options, file) {
 	const relative = file.file.replace(options.prefix, "");
 	const parts = relative.split("/");
 	const filename = parts[parts.length - 1];
-	const url = path.join(options.repository, 'blob', options.commit, options.workingDir || './', relative);
+	const url = path.join(
+		options.repository,
+		"blob",
+		options.commit,
+		options.workingDir || "./",
+		relative,
+	);
 	return {
-		href: `https://github.com/${url}`,
-		filename
-	};
+		href: `/${url}`,
+		filename,
+	}
 }
 
 // Tabulate the lcov data in a HTML table.
@@ -23099,8 +23105,11 @@ const MAX_COMMENT_CHARS = 65536;
 async function main$1() {
 	const token = core$1.getInput("github-token");
 	const githubClient = new github_2(token);
-	const workingDir = core$1.getInput('working-directory') || './';	
-	const lcovFile = path.join(workingDir, core$1.getInput("lcov-file") || "./coverage/lcov.info");
+	const workingDir = core$1.getInput("working-directory") || "./";
+	const lcovFile = path.join(
+		workingDir,
+		core$1.getInput("lcov-file") || "./coverage/lcov.info",
+	);
 	const baseFile = core$1.getInput("lcov-base");
 	const shouldFilterChangedFiles =
 		core$1.getInput("filter-changed-files").toLowerCase() === "true";
