@@ -4,12 +4,17 @@ import { createHref, normalisePath } from "./util"
 // Tabulate the lcov data in a HTML table.
 export function tabulate(lcov, options) {
 	const head = tr(
-		th("File"),
-		th("Stmts"),
-		th("Branches"),
-		th("Funcs"),
-		th("Lines"),
-		th("Uncovered Lines"),
+		...filterColumns(
+			[
+				th("File"),
+				th("Stmts"),
+				th("Branches"),
+				th("Funcs"),
+				th("Lines"),
+				th("Uncovered Lines"),
+			],
+			options,
+		),
 	)
 
 	const folders = {}
@@ -62,7 +67,7 @@ function getStatement(file) {
 	const { branches, functions, lines } = file
 
 	return [branches, functions, lines].reduce(
-		function (acc, curr) {
+		function(acc, curr) {
 			if (!curr) {
 				return acc
 			}
@@ -78,17 +83,22 @@ function getStatement(file) {
 
 function toRow(file, indent, options) {
 	return tr(
-		td(filename(file, indent, options)),
-		td(percentage(getStatement(file), options)),
-		td(percentage(file.branches, options)),
-		td(percentage(file.functions, options)),
-		td(percentage(file.lines, options)),
-		td(uncovered(file, options)),
+		...filterColumns(
+			[
+				td(filename(file, indent, options)),
+				td(percentage(getStatement(file), options)),
+				td(percentage(file.branches, options)),
+				td(percentage(file.functions, options)),
+				td(percentage(file.lines, options)),
+				td(uncovered(file, options)),
+			],
+			options,
+		),
 	)
 }
 
 function filename(file, indent, options) {
-	const {href, filename} = createHref(options, file);
+	const { href, filename } = createHref(options, file)
 	const space = indent ? "&nbsp; &nbsp;" : ""
 	return fragment(space, a({ href }, filename))
 }
@@ -118,7 +128,7 @@ function uncovered(file, options) {
 	const all = ranges([...branches, ...lines])
 
 	return all
-		.map(function (range) {
+		.map(function(range) {
 			const fragment =
 				range.start === range.end
 					? `L${range.start}`
@@ -139,7 +149,7 @@ function ranges(linenos) {
 
 	let last = null
 
-	linenos.sort().forEach(function (lineno) {
+	linenos.sort().forEach(function(lineno) {
 		if (last === null) {
 			last = { start: lineno, end: lineno }
 			return
@@ -159,4 +169,16 @@ function ranges(linenos) {
 	}
 
 	return res
+}
+
+function filterColumns(columns, options) {
+	const desiredColumns = [
+		true, // files
+		!options.omitStatementPercentage,
+		!options.omitBranchPercentage,
+		!options.omitFunctionPercentage,
+		!options.omitLinePercentage,
+		!options.omitUncoveredLines,
+	]
+	return columns.filter((v, i) => desiredColumns[i] && v)
 }

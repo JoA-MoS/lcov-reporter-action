@@ -22814,12 +22814,17 @@ function createHref(options, file) {
 // Tabulate the lcov data in a HTML table.
 function tabulate(lcov, options) {
 	const head = tr(
-		th("File"),
-		th("Stmts"),
-		th("Branches"),
-		th("Funcs"),
-		th("Lines"),
-		th("Uncovered Lines"),
+		...filterColumns(
+			[
+				th("File"),
+				th("Stmts"),
+				th("Branches"),
+				th("Funcs"),
+				th("Lines"),
+				th("Uncovered Lines"),
+			],
+			options,
+		),
 	);
 
 	const folders = {};
@@ -22872,7 +22877,7 @@ function getStatement(file) {
 	const { branches, functions, lines } = file;
 
 	return [branches, functions, lines].reduce(
-		function (acc, curr) {
+		function(acc, curr) {
 			if (!curr) {
 				return acc
 			}
@@ -22888,17 +22893,22 @@ function getStatement(file) {
 
 function toRow(file, indent, options) {
 	return tr(
-		td(filename(file, indent, options)),
-		td(percentage$1(getStatement(file))),
-		td(percentage$1(file.branches)),
-		td(percentage$1(file.functions)),
-		td(percentage$1(file.lines)),
-		td(uncovered(file, options)),
+		...filterColumns(
+			[
+				td(filename(file, indent, options)),
+				td(percentage$1(getStatement(file))),
+				td(percentage$1(file.branches)),
+				td(percentage$1(file.functions)),
+				td(percentage$1(file.lines)),
+				td(uncovered(file, options)),
+			],
+			options,
+		),
 	)
 }
 
 function filename(file, indent, options) {
-	const {href, filename} = createHref(options, file);
+	const { href, filename } = createHref(options, file);
 	const space = indent ? "&nbsp; &nbsp;" : "";
 	return fragment(space, a({ href }, filename))
 }
@@ -22928,7 +22938,7 @@ function uncovered(file, options) {
 	const all = ranges([...branches, ...lines]);
 
 	return all
-		.map(function (range) {
+		.map(function(range) {
 			const fragment =
 				range.start === range.end
 					? `L${range.start}`
@@ -22949,7 +22959,7 @@ function ranges(linenos) {
 
 	let last = null;
 
-	linenos.sort().forEach(function (lineno) {
+	linenos.sort().forEach(function(lineno) {
 		if (last === null) {
 			last = { start: lineno, end: lineno };
 			return
@@ -22969,6 +22979,18 @@ function ranges(linenos) {
 	}
 
 	return res
+}
+
+function filterColumns(columns, options) {
+	const desiredColumns = [
+		true, // files
+		!options.omitStatementPercentage,
+		!options.omitBranchPercentage,
+		!options.omitFunctionPercentage,
+		!options.omitLinePercentage,
+		!options.omitUncoveredLines,
+	];
+	return columns.filter((v, i) => desiredColumns[i] && v)
 }
 
 function comment(lcov, options) {
@@ -23117,6 +23139,17 @@ async function main$1() {
 		core$1.getInput("delete-old-comments").toLowerCase() === "true";
 	const title = core$1.getInput("title");
 
+	const omitStatementPercentage =
+		core$1.getInput("omit-statement-percentage").toLowerCase() === "true";
+	const omitBranchPercentage =
+		core$1.getInput("omit-branch-percentage").toLowerCase() === "true";
+	const omitFunctionPercentage =
+		core$1.getInput("omit-function-percentage").toLowerCase() === "true";
+	const omitLinePercentage =
+		core$1.getInput("omit-line-percentage").toLowerCase() === "true";
+	const omitUncoveredLines =
+		core$1.getInput("omit-uncovered-lines").toLowerCase() === "true";
+
 	const raw = await fs.promises.readFile(lcovFile, "utf-8").catch(err => null);
 	if (!raw) {
 		console.log(`No coverage report found at '${lcovFile}', exiting...`);
@@ -23148,6 +23181,11 @@ async function main$1() {
 
 	options.shouldFilterChangedFiles = shouldFilterChangedFiles;
 	options.title = title;
+	options.omitStatementPercentage = omitStatementPercentage;
+	options.omitBranchPercentage = omitBranchPercentage;
+	options.omitFunctionPercentage = omitFunctionPercentage;
+	options.omitLinePercentage = omitLinePercentage;
+	options.omitUncoveredLines = omitUncoveredLines;
 
 	if (shouldFilterChangedFiles) {
 		options.changedFiles = await getChangedFiles(githubClient, options, github_1);
@@ -23155,7 +23193,13 @@ async function main$1() {
 
 	const lcov = await parse$2(raw);
 	const baselcov = baseRaw && (await parse$2(baseRaw));
-	const body = diff(lcov, baselcov, options).substring(0, MAX_COMMENT_CHARS);
+	let body = diff(lcov, baselcov, options);
+	if (body.length > MAX_COMMENT_CHARS) {
+		console.warn(
+			`PR Comment length of ${body.length} is greater than the max comment length of ${MAX_COMMENT_CHARS}`,
+		);
+		body = body.substring(0, MAX_COMMENT_CHARS);
+	}
 
 	if (shouldDeleteOldComments) {
 		await deleteOldComments(githubClient, options, github_1);

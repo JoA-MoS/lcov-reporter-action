@@ -24,12 +24,28 @@ inputs:
     required: false
     default: false
   working-directory:
-    description: Set working directory if project is not in root folder  
+    description: Set working directory if project is not in root folder
     required: false
     default: "./"
   title:
     description: Title to add to the comment
     required: false
+  omit-statement-percentage:
+    description: Set to true to hide the statement percentage
+    required: false
+    default: false
+  omit-branch-percentage:
+    description: Set to true to hide the branch percentage
+    required: false
+    default: false
+  omit-line-percentage:
+    description: Set to true to hide the line percentage
+    required: false
+    default: false
+  omit-uncovered-lines:
+    description: Set to true to hide the uncovered lines
+    required: false
+    default: false
 runs:
   using: node16
   main: dist/main.js

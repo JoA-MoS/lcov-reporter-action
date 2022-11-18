@@ -26,6 +26,17 @@ async function main() {
 		core.getInput("delete-old-comments").toLowerCase() === "true"
 	const title = core.getInput("title")
 
+	const omitStatementPercentage =
+		core.getInput("omit-statement-percentage").toLowerCase() === "true"
+	const omitBranchPercentage =
+		core.getInput("omit-branch-percentage").toLowerCase() === "true"
+	const omitFunctionPercentage =
+		core.getInput("omit-function-percentage").toLowerCase() === "true"
+	const omitLinePercentage =
+		core.getInput("omit-line-percentage").toLowerCase() === "true"
+	const omitUncoveredLines =
+		core.getInput("omit-uncovered-lines").toLowerCase() === "true"
+
 	const raw = await fs.readFile(lcovFile, "utf-8").catch(err => null)
 	if (!raw) {
 		console.log(`No coverage report found at '${lcovFile}', exiting...`)
@@ -57,6 +68,11 @@ async function main() {
 
 	options.shouldFilterChangedFiles = shouldFilterChangedFiles
 	options.title = title
+	options.omitStatementPercentage = omitStatementPercentage
+	options.omitBranchPercentage = omitBranchPercentage
+	options.omitFunctionPercentage = omitFunctionPercentage
+	options.omitLinePercentage = omitLinePercentage
+	options.omitUncoveredLines = omitUncoveredLines
 
 	if (shouldFilterChangedFiles) {
 		options.changedFiles = await getChangedFiles(githubClient, options, context)
@@ -64,7 +80,13 @@ async function main() {
 
 	const lcov = await parse(raw)
 	const baselcov = baseRaw && (await parse(baseRaw))
-	const body = diff(lcov, baselcov, options).substring(0, MAX_COMMENT_CHARS)
+	let body = diff(lcov, baselcov, options)
+	if (body.length > MAX_COMMENT_CHARS) {
+		console.warn(
+			`PR Comment length of ${body.length} is greater than the max comment length of ${MAX_COMMENT_CHARS}`,
+		)
+		body = body.substring(0, MAX_COMMENT_CHARS)
+	}
 
 	if (shouldDeleteOldComments) {
 		await deleteOldComments(githubClient, options, context)
