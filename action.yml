@@ -38,6 +38,10 @@ inputs:
     description: Set to true to hide the branch percentage
     required: false
     default: false
+  omit-function-percentage:
+    description: Set to true to hide the function percentage
+    required: false
+    default: false
   omit-line-percentage:
     description: Set to true to hide the line percentage
     required: false

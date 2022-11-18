@@ -59,6 +59,10 @@ If set to true, the statement percentage column will be omitted from the generat
 
 If set to true, the branch percentage column will be omitted from the generated comment
 
+##### `omit-function-percentage` (**default: false**)
+
+If set to true, the function percentage column will be omitted from the generated comment
+
 ##### `omit-line-percentage` (**default: false**)
 
 If set to true, the line percentage column will be omitted from the generated comment
