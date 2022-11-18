@@ -1,9 +1,9 @@
-name: Code Coverage Report
+name: lcov Code Coverage Report
 description: Comments a pull request with the code coverage
-author: Romeo Van Snick
+author: Justin Dietz
 branding:
-  icon: check-square
-  color: green
+  icon: umbrella
+  color: magenta
 inputs:
   github-token:
     description: Github token
@@ -31,5 +31,5 @@ inputs:
     description: Title to add to the comment
     required: false
 runs:
-  using: node12
+  using: node16
   main: dist/main.js
