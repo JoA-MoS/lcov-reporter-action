@@ -47,6 +47,26 @@ If set to true, old comments will be deleted before a new comment is posted
 
 If included, will be added as a title for the comment produced.
 
+##### `delete-old-comments` (**Default: false**)
+
+If set to true, old comments will be deleted before a new comment is posted
+
+##### `omit-statement-percentage` (**default: false**)
+
+If set to true, the statement percentage column will be omitted from the generated comment
+
+##### `omit-branch-percentage` (**default: false**)
+
+If set to true, the branch percentage column will be omitted from the generated comment
+
+##### `omit-line-percentage` (**default: false**)
+
+If set to true, the line percentage column will be omitted from the generated comment
+
+##### `omit-uncovered-lines` (**default: false**)
+
+If set to true, the uncovered lines column will be omitted from the generated comment
+
 ## Example usage
 
 ```yml

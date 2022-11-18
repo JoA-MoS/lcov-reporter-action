@@ -23122,7 +23122,7 @@ async function getExistingComments(github, options, context) {
 	)
 }
 
-const MAX_COMMENT_CHARS = Infinity;
+const MAX_COMMENT_CHARS = 65536;
 
 async function main$1() {
 	const token = core$1.getInput("github-token");
@@ -23196,7 +23196,7 @@ async function main$1() {
 	let body = diff(lcov, baselcov, options);
 	if (body.length > MAX_COMMENT_CHARS) {
 		console.warn(
-			`PR Comment length of ${body.length} is greater than the max comment length of ${MAX_COMMENT_CHARS}`,
+			`PR Comment length of ${body.length} is greater than the max comment length of ${MAX_COMMENT_CHARS} the comment will be truncated`,
 		);
 		body = body.substring(0, MAX_COMMENT_CHARS);
 	}
