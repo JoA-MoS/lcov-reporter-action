@@ -23122,7 +23122,7 @@ async function getExistingComments(github, options, context) {
 	)
 }
 
-const MAX_COMMENT_CHARS = 65536;
+const MAX_COMMENT_CHARS = Infinity;
 
 async function main$1() {
 	const token = core$1.getInput("github-token");
